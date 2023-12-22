@@ -3,3 +3,5 @@ Flask==2.0.1
 opencv-python
 PyMuPDF
 numpy
+keras==2.6.0
+tensorflow==2.7.0

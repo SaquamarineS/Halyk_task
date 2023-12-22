@@ -1,87 +1,96 @@
+import os
 import cv2
-import fitz
-from PIL import Image
-from io import BytesIO
 import numpy as np
+import tensorflow as tf
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Conv2D, MaxPooling2D, Flatten, Dense
+
+# Путь к каталогу с фотографиями подписей
+images_directory = r'task_5/teachers_signature'
 
 
-class SignatureDetector:
-    def __init__(self):
-        pass
+# Создание датасета из изображений
+def create_dataset(directory):
+    image_data = []
+    labels = []
 
-    def detect_from_jpeg(self, image_path):
-        try:
-            image = cv2.imread(image_path)
+    for filename in os.listdir(directory):
+        if filename.endswith(".jpg"):
+            img = cv2.imread(os.path.join(directory, filename))
+            img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)  # Преобразование в оттенки серого
+            img = cv2.resize(img, (128, 128))  # Изменение размера изображения
+            img = np.expand_dims(img, axis=-1)  # Добавление измерения канала
 
-            gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-            _, threshold = cv2.threshold(gray_image, 127, 255, cv2.THRESH_BINARY)
-            contours, _ = cv2.findContours(threshold, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+            # Добавление данных и меток
+            image_data.append(img)
+            labels.append(1)  # Метка 1 для изображений с подписью
 
-            signature_detected = False
-            for contour in contours:
-                x, y, w, h = cv2.boundingRect(contour)
-                aspect_ratio = float(w) / h
+    return np.array(image_data), np.array(labels)
 
-                if 2.0 <= aspect_ratio <= 4.0:
-                    signature_detected = True
-                    break
 
-            return signature_detected
-        except Exception as e:
-            print(f"Error: {e}")
-            return False
+# Загрузка данных
+images, labels = create_dataset(images_directory)
 
-    def detect_from_pdf(self, pdf_path):
-        try:
-            pdf_document = fitz.open(pdf_path)
-            signature_detected = False
+# Создание модели нейронной сети
+model = Sequential([
+    Conv2D(32, (3, 3), activation='relu', input_shape=(128, 128, 1)),
+    MaxPooling2D((2, 2)),
+    Conv2D(64, (3, 3), activation='relu'),
+    MaxPooling2D((2, 2)),
+    Flatten(),
+    Dense(64, activation='relu'),
+    Dense(1, activation='sigmoid')
+])
 
-            for page_num in range(len(pdf_document)):
-                page = pdf_document.load_page(page_num)
-                pix = page.get_pixmap(alpha=False)
-                img = Image.frombytes("RGB", [pix.width, pix.height], pix.samples)
+# Компиляция модели
+model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
 
-                open_cv_image = cv2.cvtColor(np.array(img), cv2.COLOR_RGB2BGR)
-                gray_image = cv2.cvtColor(open_cv_image, cv2.COLOR_BGR2GRAY)
+# Обучение модели
+model.fit(images, labels, epochs=10, batch_size=32, validation_split=0.2)
 
-                _, threshold = cv2.threshold(gray_image, 127, 255, cv2.THRESH_BINARY)
-                contours, _ = cv2.findContours(threshold, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+# Сохранение модели
+model.save('signature_detection_model.h5')
 
-                for contour in contours:
-                    x, y, w, h = cv2.boundingRect(contour)
-                    aspect_ratio = float(w) / h
 
-                    if 2.0 <= aspect_ratio <= 4.0:
-                        signature_detected = True
-                        break
+# Тестирование модели на новых данных
+def predict_signatures(test_image_path):
+    test_image = cv2.imread(test_image_path)
+    test_image = cv2.cvtColor(test_image, cv2.COLOR_BGR2GRAY)
+    test_image = cv2.resize(test_image, (128, 128))
+    test_image = np.expand_dims(test_image, axis=-1)
+    test_image = np.expand_dims(test_image, axis=0)  # Добавление измерения батча
 
-                if signature_detected:
-                    break
+    prediction = model.predict(test_image)
+    return prediction[0][0]  # Возвращаем результат предсказания
 
-            pdf_document.close()
-            return signature_detected
-        except Exception as e:
-            print(f"Error: {e}")
-            return False
 
-    def detect_from_tiff(self, tiff_path):
-        try:
-            image = cv2.imread(tiff_path)
+def extract_signatures(image_path):
+    img = cv2.imread(image_path)
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    _, thresh = cv2.threshold(gray, 127, 255, cv2.THRESH_BINARY)
 
-            gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-            _, threshold = cv2.threshold(gray_image, 127, 255, cv2.THRESH_BINARY)
-            contours, _ = cv2.findContours(threshold, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
-            signature_detected = False
-            for contour in contours:
-                x, y, w, h = cv2.boundingRect(contour)
-                aspect_ratio = float(w) / h
+    signatures = []
+    for i, contour in enumerate(contours):
+        x, y, w, h = cv2.boundingRect(contour)
+        signature = img[y:y + h, x:x + w]  # Вырезаем область с подписью
+        signatures.append(signature)
+        cv2.imwrite(f'signature_{i + 1}.jpg', signature)  # Сохраняем каждую подпись в отдельный файл
 
-                if 2.0 <= aspect_ratio <= 4.0:
-                    signature_detected = True
-                    break
+    return signatures
 
-            return signature_detected
-        except Exception as e:
-            print(f"Error: {e}")
-            return False
+# Пример использования функции
+image_path_with_multiple_signatures = 'task_5/test_signature/img_1.jpg'
+multiple_signatures = extract_signatures(image_path_with_multiple_signatures)
+
+
+
+# Пример тестирования на новых данных
+'''test_image_path = 'путь_к_тестовому_изображению.jpg'
+prediction_result = predict_signatures(test_image_path)
+if prediction_result >= 0.5:
+    print("Изображение содержит подпись")
+else:
+    print("Изображение НЕ содержит подписи")
+'''

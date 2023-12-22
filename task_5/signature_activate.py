@@ -3,7 +3,7 @@ from signature_detector import *
 if __name__ == "__main__":
     # Пример использования
     detector = SignatureDetector()
-    jpeg_result = detector.detect_from_jpeg(r'task_5/teachers_signature/img_1.png')
+    jpeg_result = detector.detect_from_jpeg(r'task_5/teachers_signature/img_1.jpg')
     #pdf_result = detector.detect_from_pdf('path/to/your/pdf_document.pdf')
     #tiff_result = detector.detect_from_tiff('path/to/your/tiff_image.tiff')
 
