@@ -6,70 +6,78 @@ from skimage.color import label2rgb
 from skimage.measure import regionprops
 import numpy as np
 
-# Параметры используются для удаления маленьких связанных пикселей-выбросов
-constant_parameter_1 = 84
-constant_parameter_2 = 250
-constant_parameter_3 = 100
-constant_parameter_4 = 18
-
-# Получаем список файлов формата JPG в каталоге inputs
-input_folder = 'inputs'
-output_folder = 'outputs'
-
-for filename in os.listdir(input_folder):
-    if filename.endswith(".jpg"):
-        img_path = os.path.join(input_folder, filename)
-        img = cv2.imread(img_path, 0)
-        img = cv2.threshold(img, 127, 255, cv2.THRESH_BINARY)[1]
-
-        # Анализ связанных компонентов с помощью фреймворка scikit-learn
-        blobs = img > img.mean()
-        blobs_labels = measure.label(blobs, background=1)
+def detect_signatures_in_image(input_folder, output_folder):
+    # Параметры используются для удаления маленьких связанных пикселей-выбросов
+    constant_parameter_1 = 84
+    constant_parameter_2 = 250
+    constant_parameter_3 = 100
+    constant_parameter_4 = 18
 
 
-        image_label_overlay = label2rgb(blobs_labels, image=img)
+    for filename in os.listdir(input_folder):
+        if filename.endswith(".jpg"):
+            img_path = os.path.join(input_folder, filename)
+            img = cv2.imread(img_path, 0)
+            img = cv2.threshold(img, 127, 255, cv2.THRESH_BINARY)[1]
 
-        fig, ax = plt.subplots(figsize=(10, 6))
+            # Анализ связанных компонентов с помощью фреймворка scikit-learn
+            blobs = img > img.mean()
+            blobs_labels = measure.label(blobs, background=1)
 
-        the_biggest_component = 0
-        total_area = 0
-        counter = 0
-        average = 0.0
-        for region in regionprops(blobs_labels):
-            if (region.area > 10):
-                total_area = total_area + region.area
-                counter = counter + 1
-            # print region.area # (для отладки)
-            # выбираем области с достаточно большими площадями
-            if (region.area >= 250):
-                if (region.area > the_biggest_component):
-                    the_biggest_component = region.area
+            image_label_overlay = label2rgb(blobs_labels, image=img)
 
-        average = (total_area / counter)
-        print("Наибольшая компонента: " + str(the_biggest_component))
-        print("Среднее: " + str(average))
+            fig, ax = plt.subplots(figsize=(10, 6))
 
-        # Расчет параметров на основе эксперимента, подстраивайте под свои случаи
-        # a4_small_size_outliar_constant используется в качестве порогового значения для удаления связанных пикселей-выбросов,
-        # меньших, чем a4_small_size_outliar_constant для отсканированных документов формата A4
-        a4_small_size_outliar_constant = ((average / constant_parameter_1) * constant_parameter_2) + constant_parameter_3
-        print("a4_small_size_outliar_constant: " + str(a4_small_size_outliar_constant))
+            the_biggest_component = 0
+            total_area = 0
+            counter = 0
+            average = 0.0
+            for region in regionprops(blobs_labels):
+                if (region.area > 10):
+                    total_area = total_area + region.area
+                    counter = counter + 1
+                # print region.area # (для отладки)
+                # выбираем области с достаточно большими площадями
+                if (region.area >= 250):
+                    if (region.area > the_biggest_component):
+                        the_biggest_component = region.area
 
-        # Расчет параметров на основе эксперимента, подстраивайте под свои случаи
-        # a4_big_size_outliar_constant используется в качестве порогового значения для удаления связанных пикселей-выбросов,
-        # больших, чем a4_big_size_outliar_constant для отсканированных документов формата A4
-        a4_big_size_outliar_constant = a4_small_size_outliar_constant * constant_parameter_4
-        print("a4_big_size_outliar_constant: " + str(a4_big_size_outliar_constant))
+            average = (total_area / counter)
+            print("Наибольшая компонента: " + str(the_biggest_component))
+            print("Среднее: " + str(average))
 
-        pre_version = morphology.remove_small_objects(blobs_labels, a4_small_size_outliar_constant)
-        component_sizes = np.bincount(pre_version.ravel())
-        too_small = component_sizes > (a4_big_size_outliar_constant)
-        too_small_mask = too_small[pre_version]
-        pre_version[too_small_mask] = 0
-        plt.imsave('pre_version.png', pre_version)
-        img = cv2.imread('pre_version.png', 0)
-        img = cv2.threshold(img, 0, 255, cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU)[1]
+            # Расчет параметров на основе эксперимента, подстраивайте под свои случаи
+            # a4_small_size_outliar_constant используется в качестве порогового значения для удаления связанных пикселей-выбросов,
+            # меньших, чем a4_small_size_outliar_constant для отсканированных документов формата A4
+            a4_small_size_outliar_constant = ((
+                                                          average / constant_parameter_1) * constant_parameter_2) + constant_parameter_3
+            print("a4_small_size_outliar_constant: " + str(a4_small_size_outliar_constant))
 
-        # Сохраняем результаты в каталог outputs
-        output_path = os.path.join(output_folder, f"output_{filename}")
-        cv2.imwrite(output_path, img)
+            # Расчет параметров на основе эксперимента, подстраивайте под свои случаи
+            # a4_big_size_outliar_constant используется в качестве порогового значения для удаления связанных пикселей-выбросов,
+            # больших, чем a4_big_size_outliar_constant для отсканированных документов формата A4
+            a4_big_size_outliar_constant = a4_small_size_outliar_constant * constant_parameter_4
+            print("a4_big_size_outliar_constant: " + str(a4_big_size_outliar_constant))
+
+            pre_version = morphology.remove_small_objects(blobs_labels, a4_small_size_outliar_constant)
+            component_sizes = np.bincount(pre_version.ravel())
+            too_small = component_sizes > (a4_big_size_outliar_constant)
+            too_small_mask = too_small[pre_version]
+            pre_version[too_small_mask] = 0
+            plt.imsave('pre_version.png', pre_version)
+            img = cv2.imread('pre_version.png', 0)
+            img = cv2.threshold(img, 0, 255, cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU)[1]
+
+            # Сохраняем результаты в каталог outputs
+            output_path = os.path.join(output_folder, f"{output_folder}_{filename}")
+            cv2.imwrite(output_path, img)
+
+
+
+if __name__ == "__main__":
+    # Получаем список файлов формата JPG в каталоге inputs
+    input_folder = 'inputs'
+    output_folder = 'outputs'
+
+    # Активация функции
+    detect_signatures_in_image(input_folder, output_folder)

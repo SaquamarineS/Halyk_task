@@ -1,59 +1,61 @@
-import fitz
 from flask import Flask, request, jsonify
-import cv2
-import numpy as np
-from tensorflow.keras.models import load_model
+import os
+import uuid
+from task_5.runner import detect_signatures_in_image
+
 
 app = Flask(__name__)
 
-# Загрузка предварительно обученной модели
-model = load_model('signature_detection_model.h5')
+UPLOAD_FOLDER = 'uploads'  # Папка для сохранения загруженных изображений
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 
-def extract_images_from_pdf(pdf_path):
-    images = []
-    pdf_document = fitz.open(pdf_path)
+def save_image(image):
+    if not os.path.exists(app.config['UPLOAD_FOLDER']):
+        os.makedirs(app.config['UPLOAD_FOLDER'])
 
-    for page_num in range(len(pdf_document)):
-        page = pdf_document.load_page(page_num)
-        pix = page.get_pixmap()
-        img = np.frombuffer(pix.samples, dtype=np.uint8).reshape(pix.height, pix.width, 4)[:, :, :3]
-        images.append(img)
+    unique_filename = str(uuid.uuid4())  # Генерация уникального идентификатора
+    image_path = os.path.join(app.config['UPLOAD_FOLDER'], unique_filename + '.jpg')
+    image.save(image_path)  # Сохранение изображения на сервере
 
-    pdf_document.close()
-    return images
+    return unique_filename  # Возвращаем уникальный идентификатор файла
 
 
-# Маршрут для обнаружения подписей в PDF-файле
-@app.route('/detect_signature_in_pdf', methods=['POST'])
-def detect_signature_in_pdf():
-    file = request.files['file']
-    file_bytes = file.read()
+# Загрузка изображения
+@app.route('/api/upload', methods=['POST'])
+def upload_image():
+    if 'image' not in request.files:
+        return jsonify({'error': 'No image provided'}), 400
 
-    # Проверка типа загруженного файла (pdf или изображение)
-    if file.filename.lower().endswith('.pdf'):
-        images = extract_images_from_pdf(file_bytes)
+    image = request.files['image']
+    # Здесь будет код для сохранения изображения и генерации уникального идентификатора
+    # image_id = save_image(image)  # Предположим, что есть функция для сохранения изображения
+
+    image_id = 'unique_id_placeholder'  # Замените эту строку на генерацию уникального идентификатора
+
+    return jsonify({'image_id': image_id}), 201
+
+
+@app.route('/api/upload', methods=['POST'])
+def upload_image():
+    if 'image' not in request.files:
+        return jsonify({'error': 'No image provided'}), 400
+
+    image = request.files['image']
+    unique_filename = str(uuid.uuid4())  # Генерация уникального имени файла
+    image_path = os.path.join('uploads', unique_filename + '.jpg')
+    image.save(image_path)  # Сохранение загруженного изображения
+
+    # Вызываем вашу функцию для обработки загруженного изображения
+    output_folder = 'processed_images'
+    detect_signatures_in_image('uploads', output_folder)
+
+    processed_image_path = os.path.join(output_folder, unique_filename + '.jpg')
+    if os.path.exists(processed_image_path):
+        return send_file(processed_image_path, mimetype='image/jpeg'), 200
     else:
-        img = cv2.imdecode(np.frombuffer(file_bytes, np.uint8), cv2.IMREAD_COLOR)
-        gray_img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        images = [gray_img]
+        return jsonify({'error': 'Signature detection failed'}), 500
 
-    # Обнаружение подписей на каждом изображении
-    signature_results = []
-    for idx, image in enumerate(images):
-        resized_img = cv2.resize(image, (128, 128))
-        resized_img = np.expand_dims(resized_img, axis=-1)
-        resized_img = np.expand_dims(resized_img, axis=0)
-
-        prediction = model.predict(resized_img)
-        if prediction[0][0] >= 0.5:
-            result = f"На странице {idx + 1} обнаружена подпись"
-        else:
-            result = f"На странице {idx + 1} подписей не обнаружено"
-
-        signature_results.append(result)
-
-    return jsonify({"results": signature_results})
 
 
 if __name__ == '__main__':
