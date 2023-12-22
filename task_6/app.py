@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_file
 import os
 import uuid
 from task_5.runner import detect_signatures_in_image
@@ -22,20 +22,6 @@ def save_image(image):
 
 
 # Загрузка изображения
-@app.route('/api/upload', methods=['POST'])
-def upload_image():
-    if 'image' not in request.files:
-        return jsonify({'error': 'No image provided'}), 400
-
-    image = request.files['image']
-    # Здесь будет код для сохранения изображения и генерации уникального идентификатора
-    # image_id = save_image(image)  # Предположим, что есть функция для сохранения изображения
-
-    image_id = 'unique_id_placeholder'  # Замените эту строку на генерацию уникального идентификатора
-
-    return jsonify({'image_id': image_id}), 201
-
-
 @app.route('/api/upload', methods=['POST'])
 def upload_image():
     if 'image' not in request.files:
