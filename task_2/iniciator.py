@@ -1,4 +1,4 @@
-from Task_2.pdf_reader import PdfReader
+from task_2.pdf_reader import PdfReader
 
 if __name__ == "__main__":
     # Относительный путь к файлу PDF внутри репозитория
