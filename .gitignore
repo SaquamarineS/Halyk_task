@@ -1,0 +1,9 @@
+# .gitignore
+
+# Virtual Environment
+myenv/
+
+# Остальные временные файлы
+*.log
+*.pyc
+__pycache__/

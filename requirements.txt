@@ -1,0 +1,6 @@
+PyPDF2==1.26.0
+Flask==2.0.1
+opencv-python
+PyMuPDF
+numpy
+fitz
