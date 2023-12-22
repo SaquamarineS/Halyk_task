@@ -10,6 +10,11 @@ UPLOAD_FOLDER = 'uploads'  # Папка для сохранения загруж
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 
+@app.route('/')
+def index():
+    return 'Hello, welcome to the signature detection service!'
+
+
 def save_image(image):
     if not os.path.exists(app.config['UPLOAD_FOLDER']):
         os.makedirs(app.config['UPLOAD_FOLDER'])
