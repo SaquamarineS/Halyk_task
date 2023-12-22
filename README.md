@@ -72,7 +72,7 @@ myenv\Scripts\activate  # для Windows
 
 - Установка библиотек через requirements.txt:
   
-  ```bash
+```bash
 pip install -r requirements.txt
 ```
 
