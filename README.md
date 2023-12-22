@@ -21,11 +21,21 @@ cd Halyk_task
   
 ```bash
 python -m venv myenv
-source myenv/bin/activate  # для Unix/Mac
-myenv\Scripts\activate  # для Windows
 ```
 
-- Установка библиотек через requirements.txt:
+# для Unix/Mac
+
+```bash
+source myenv/bin/activate
+```
+
+# для Windows
+
+```bash
+myenv\Scripts\activate
+```
+
+- Установка библиотек для заданий через requirements.txt:
   
 ```bash
 pip install -r requirements.txt
