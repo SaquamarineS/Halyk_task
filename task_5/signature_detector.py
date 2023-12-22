@@ -6,7 +6,7 @@ from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Conv2D, MaxPooling2D, Flatten, Dense
 
 # Путь к каталогу с фотографиями подписей
-images_directory = r'task_5/teachers_signature'
+images_directory = r'C:\Users\77003\PycharmProjects\Halyk_task\task_5\teachers_signature'
 
 
 # Создание датасета из изображений
@@ -80,17 +80,3 @@ def extract_signatures(image_path):
 
     return signatures
 
-# Пример использования функции
-image_path_with_multiple_signatures = 'task_5/test_signature/img_1.jpg'
-multiple_signatures = extract_signatures(image_path_with_multiple_signatures)
-
-
-
-# Пример тестирования на новых данных
-'''test_image_path = 'путь_к_тестовому_изображению.jpg'
-prediction_result = predict_signatures(test_image_path)
-if prediction_result >= 0.5:
-    print("Изображение содержит подпись")
-else:
-    print("Изображение НЕ содержит подписи")
-'''

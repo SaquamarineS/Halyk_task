@@ -1,12 +1,18 @@
 from signature_detector import *
+from signature_methods import *
+
 
 if __name__ == "__main__":
-    # Пример использования
-    detector = SignatureDetector()
-    jpeg_result = detector.detect_from_jpeg(r'task_5/teachers_signature/img_1.jpg')
-    #pdf_result = detector.detect_from_pdf('path/to/your/pdf_document.pdf')
-    #tiff_result = detector.detect_from_tiff('path/to/your/tiff_image.tiff')
+    # Пример тестирования на новых данных для нескольких изображений
+    test_image_directory = r'C:\Users\77003\PycharmProjects\Halyk_task\task_5\test_signature'  # Указать путь к директории с тестовыми изображениями
+    for filename in os.listdir(test_image_directory):
+        if filename.endswith(".jpg"):
+            test_image_path = os.path.join(test_image_directory, filename)
+            prediction_result = predict_signatures(test_image_path)
+            if prediction_result >= 0.5:
+                print(f"Файл '{filename}' содержит подпись")
+            else:
+                print(f"Файл '{filename}' НЕ содержит подписи")
 
-    print(f"JPEG: Signature Detected - {jpeg_result}")
-    #print(f"PDF: Signature Detected - {pdf_result}")
-    #print(f"TIFF: Signature Detected - {tiff_result}")
+
+
