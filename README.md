@@ -35,15 +35,10 @@
 
 1. Клонируйте репозиторий:
 
-```bash
-git clone https://github.com/your-username/your-repo.git
-cd your-repo
 ```
-
-2. Установите необходимые зависимости:
-
-```bash
-pip install PyPDF2 # Если эта библиотека еще не установлена
+bash
+git clone https://github.com/SaquamarineS/Halyk_task.git
+cd Halyk_task
 ```
 
 ### Пример использования
@@ -74,6 +69,6 @@ pdf_reader.save_text_to_file(output_directory)
 
 ## Документация к классу PdfReader
 
-Дополнительную информацию о методах и их функциональности можно найти в коде класса `PdfReader` и в комментариях к нему.
+Дополнительную информацию о методах и их функциональности можно найти в коде класса `PdfReader` и в комментариях к нему. Также расписал внутри модулей в Task_2 что делают методы
 
 ---
