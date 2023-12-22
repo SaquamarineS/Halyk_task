@@ -11,31 +11,31 @@
 
 #### Установка
 
-- Клонируйте репозиторий:
+#### Клонируйте репозиторий:
 
 ```bash
 git clone https://github.com/SaquamarineS/Halyk_task.git
 cd Halyk_task
 ```
-- Создайте и активируйте виртуальное окружение:
+#### Создайте и активируйте виртуальное окружение:
   
 ```bash
 python -m venv myenv
 ```
 
-# для Unix/Mac
+#### для Unix/Mac
 
 ```bash
 source myenv/bin/activate
 ```
 
-# для Windows
+#### для Windows
 
 ```bash
 myenv\Scripts\activate
 ```
 
-- Установка библиотек для заданий через requirements.txt:
+#### Установка библиотек для заданий через requirements.txt 
   
 ```bash
 pip install -r requirements.txt
