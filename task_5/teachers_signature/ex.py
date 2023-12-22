@@ -13,11 +13,11 @@ def split_image(image_path, output_directory):
             box = (i, j, i + sub_width, j + sub_height)
             cropped_img = img.crop(box)
             cropped_images.append(cropped_img)
-            cropped_img.save(f"{output_directory}/img_{len(cropped_images)+8}.png")
+            cropped_img.save(f"{output_directory}/img_{len(cropped_images)+8}.jpg")
 
     return cropped_images
 
 # Пример использования функции
-image_path = r'task_5/teachers_signature/img.png'
+image_path = r'task_5/teachers_signature/img_3.png'
 output_directory = r'task_5/teachers_signature'
 split_images = split_image(image_path, output_directory)
