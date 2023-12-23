@@ -17,15 +17,22 @@
 git clone https://github.com/SaquamarineS/Halyk_task.git
 cd Halyk_task
 ```
-- Создайте и активируйте виртуальное окружение:
-  
+# Создайте виртуальное окружение
 ```bash
 python -m venv myenv
-source myenv/bin/activate  # для Unix/Mac
-myenv\Scripts\activate  # для Windows
+```
+# Активируйте виртуальное окружение
+- Windovs
+```bash
+myenv\Scripts\activate 
+```
+или
+- Unix/Mac
+```bash
+source myenv/bin/activate 
 ```
 
-- Установка библиотек через requirements.txt:
+# Установка всех библиотек для заданий через requirements.txt:
   
 ```bash
 pip install -r requirements.txt
