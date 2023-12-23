@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Detect Signatures</title>
+</head>
+<body>
+    <h1>Detect Signatures</h1>
+    <form action="/api/upload" method="post" enctype="multipart/form-data">
+        <input type="file" name="image" accept=".jpg">
+        <input type="submit" value="Upload Image">
+    </form>
+
+    {% if image_path %}
+        <h2>Processed Image with Signatures</h2>
+        <img src="{{ image_path }}" alt="Processed Image">
+    {% endif %}
+
+    {% if signatures_image_paths %}
+        <h2>Images with Detected Signatures</h2>
+        {% for path in signatures_image_paths %}
+            <img src="{{ path }}" alt="Image with Signatures">
+        {% endfor %}
+    {% endif %}
+
+    <form action="/api/detect_signatures" method="post">
+        <input type="submit" value="Detect Signatures">
+    </form>
+</body>
+</html>
