@@ -73,6 +73,48 @@ def detect_signatures_in_image(input_folder, output_folder):
             cv2.imwrite(output_path, img)
 
 
+def has_signatures(input_folder):
+    constant_parameter_1 = 84
+    constant_parameter_2 = 250
+    constant_parameter_3 = 100
+    constant_parameter_4 = 18
+
+    for filename in os.listdir(input_folder):
+        if filename.endswith(".jpg"):
+            img_path = os.path.join(input_folder, filename)
+            img = cv2.imread(img_path, 0)
+            img = cv2.threshold(img, 127, 255, cv2.THRESH_BINARY)[1]
+
+            blobs = img > img.mean()
+            blobs_labels = measure.label(blobs, background=1)
+
+            the_biggest_component = 0
+            total_area = 0
+            counter = 0
+            average = 0.0
+            for region in regionprops(blobs_labels):
+                if region.area > 10:
+                    total_area = total_area + region.area
+                    counter = counter + 1
+
+                if region.area >= 250:
+                    if region.area > the_biggest_component:
+                        the_biggest_component = region.area
+
+            average = total_area / counter
+            a4_small_size_outlier_constant = ((average / constant_parameter_1) * constant_parameter_2) + constant_parameter_3
+            a4_big_size_outlier_constant = a4_small_size_outlier_constant * constant_parameter_4
+
+            component_sizes = np.bincount(blobs_labels.ravel())
+            too_small = component_sizes > a4_big_size_outlier_constant
+
+            if np.any(too_small):
+                return True
+
+    return False
+
+
+
 
 if __name__ == "__main__":
     # Получаем список файлов формата JPG в каталоге inputs
