@@ -21,6 +21,8 @@ if not os.path.exists(OUTPUTS):
 def index():
     return render_template('index.html')
 
+
+
 def save_image(image):
     if not os.path.exists(app.config['UPLOAD_FOLDER']):
         os.makedirs(app.config['UPLOAD_FOLDER'])
