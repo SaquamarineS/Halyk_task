@@ -79,3 +79,4 @@ class PdfReader:
             print("Файл не найден.")
         except PyPDF2.utils.PdfReadError:
             print("Ошибка при чтении PDF.")
+
