@@ -166,5 +166,7 @@ cd task_6
 python app.py
 ```
 
+#### Дополнительно
+Для полноценной реализации через Flask и к примеру PostgreSQL можно посмотреть как написать RESTful сервис в https://github.com/dexterpuru/flask_image/tree/master чтобы хранить фотографии через БД и отправлять по ссылочно к фотографии.
 
 ---
