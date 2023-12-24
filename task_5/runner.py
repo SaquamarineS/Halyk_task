@@ -8,10 +8,10 @@ import numpy as np
 
 def detect_signatures_in_image(input_folder, output_folder):
     # Параметры используются для удаления маленьких связанных пикселей-выбросов
-    constant_parameter_1 = 84
-    constant_parameter_2 = 250
-    constant_parameter_3 = 100
-    constant_parameter_4 = 18
+    threshold1 = 84
+    threshold2 = 250
+    threshold3 = 100
+    threshold4 = 18
 
 
     for filename in os.listdir(input_folder):
@@ -49,19 +49,18 @@ def detect_signatures_in_image(input_folder, output_folder):
             # Расчет параметров на основе эксперимента, подстраивайте под свои случаи
             # a4_small_size_outliar_constant используется в качестве порогового значения для удаления связанных пикселей-выбросов,
             # меньших, чем a4_small_size_outliar_constant для отсканированных документов формата A4
-            a4_small_size_outliar_constant = ((
-                                                          average / constant_parameter_1) * constant_parameter_2) + constant_parameter_3
-            print("a4_small_size_outliar_constant: " + str(a4_small_size_outliar_constant))
+            a4_small_threshold = ((average / threshold1) * threshold2) + threshold3
+            print("a4_small_threshold: " + str(a4_small_threshold))
 
             # Расчет параметров на основе эксперимента, подстраивайте под свои случаи
             # a4_big_size_outliar_constant используется в качестве порогового значения для удаления связанных пикселей-выбросов,
             # больших, чем a4_big_size_outliar_constant для отсканированных документов формата A4
-            a4_big_size_outliar_constant = a4_small_size_outliar_constant * constant_parameter_4
-            print("a4_big_size_outliar_constant: " + str(a4_big_size_outliar_constant))
+            a4_big_threshold = a4_small_threshold * threshold4
+            print("a4_big_threshold: " + str(a4_big_threshold))
 
-            pre_version = morphology.remove_small_objects(blobs_labels, a4_small_size_outliar_constant)
+            pre_version = morphology.remove_small_objects(blobs_labels, a4_small_threshold)
             component_sizes = np.bincount(pre_version.ravel())
-            too_small = component_sizes > (a4_big_size_outliar_constant)
+            too_small = component_sizes > (a4_big_threshold)
             too_small_mask = too_small[pre_version]
             pre_version[too_small_mask] = 0
             plt.imsave('pre_version.png', pre_version)
@@ -74,10 +73,10 @@ def detect_signatures_in_image(input_folder, output_folder):
 
 
 def has_signatures(input_folder):
-    constant_parameter_1 = 84
-    constant_parameter_2 = 250
-    constant_parameter_3 = 100
-    constant_parameter_4 = 18
+    threshold1 = 84
+    threshold2 = 250
+    threshold3 = 100
+    threshold4 = 18
 
     for filename in os.listdir(input_folder):
         if filename.endswith(".jpg"):
@@ -102,18 +101,16 @@ def has_signatures(input_folder):
                         the_biggest_component = region.area
 
             average = total_area / counter
-            a4_small_size_outlier_constant = ((average / constant_parameter_1) * constant_parameter_2) + constant_parameter_3
-            a4_big_size_outlier_constant = a4_small_size_outlier_constant * constant_parameter_4
+            a4_small_threshold = ((average / threshold1) * threshold2) + threshold3
+            a4_big_threshold = a4_small_threshold * threshold4
 
             component_sizes = np.bincount(blobs_labels.ravel())
-            too_small = component_sizes > a4_big_size_outlier_constant
+            too_small = component_sizes > a4_big_threshold
 
             if np.any(too_small):
                 return True
 
     return False
-
-
 
 
 if __name__ == "__main__":
